@@ -15,25 +15,16 @@ https://github.com/benhoyt/inih
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
 #include "ini.h"
 
-#if !INI_USE_STACK
-#include <stdlib.h>
-#endif
-
 #define MAX_SECTION 50
 #define MAX_NAME 50
-
-/* Used by ini_parse_string() to keep track of string parsing state. */
-typedef struct {
-    const char* ptr;
-    size_t num_left;
-} ini_parse_string_ctx;
 
 /* Strip whitespace chars off end of given string, in place. end must be a
    pointer to the NUL terminator at the end of the string. Return s. */
@@ -84,9 +75,32 @@ static char* ini_strncpy0(char* dest, const char* src, size_t size)
     return dest;
 }
 
+/* Copy at most cap-1 bytes from the input string into buf, stopping at a
+   newline. NUL-terminates buf and advances the input cursor (pptr, pleft).
+   Returns the number of bytes written (excluding the NUL). */
+static size_t ini_read_line(char* buf, size_t cap,
+                            const char** pptr, size_t* pleft)
+{
+    const char* p = *pptr;
+    size_t n = *pleft;
+    size_t i = 0;
+    char c;
+
+    while (i < cap - 1 && n > 0) {
+        c = *p++;
+        n--;
+        buf[i++] = c;
+        if (c == '\n')
+            break;
+    }
+    buf[i] = '\0';
+    *pptr = p;
+    *pleft = n;
+    return i;
+}
+
 /* See documentation in header file. */
-int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-                     void* user)
+int ini_parse_string(const char* string, ini_handler handler, void* user)
 {
     /* Uses a fair bit of stack (use heap instead if you need to) */
 #if INI_USE_STACK
@@ -104,6 +118,8 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
     char prev_name[MAX_NAME] = "";
 #endif
 
+    const char* ptr;
+    size_t num_left;
     size_t offset;
     char* start;
     char* end;
@@ -114,9 +130,11 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
     char abyss[16];  /* Used to consume input when a line is too long. */
     size_t abyss_len;
 
-    assert(reader != NULL);
-    assert(stream != NULL);
+    assert(string != NULL);
     assert(handler != NULL);
+
+    ptr = string;
+    num_left = strlen(string);
 
 #if !INI_USE_STACK
     line = (char*)malloc(INI_INITIAL_ALLOC);
@@ -131,10 +149,8 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
 #define HANDLER(u, s, n, v) handler(u, s, n, v)
 #endif
 
-    /* Scan through stream line by line */
-    while (reader(line, (int)max_line, stream) != NULL) {
-        offset = strlen(line);
-
+    /* Scan through input line by line */
+    while ((offset = ini_read_line(line, max_line, &ptr, &num_left)) > 0) {
 #if INI_ALLOW_REALLOC && !INI_USE_STACK
         while (max_line < INI_MAX_LINE &&
                offset == max_line - 1 && line[offset - 1] != '\n') {
@@ -147,9 +163,10 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
                 return -2;
             }
             line = new_line;
-            if (reader(line + offset, (int)(max_line - offset), stream) == NULL)
+            offset += ini_read_line(line + offset, max_line - offset,
+                                    &ptr, &num_left);
+            if (num_left == 0)
                 break;
-            offset += strlen(line + offset);
         }
 #endif
 
@@ -157,11 +174,11 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
 
         /* If line exceeded INI_MAX_LINE bytes, discard till end of line. */
         if (offset == max_line - 1 && line[offset - 1] != '\n') {
-            while (reader(abyss, sizeof(abyss), stream) != NULL) {
+            while ((abyss_len = ini_read_line(abyss, sizeof(abyss),
+                                              &ptr, &num_left)) > 0) {
                 if (!error)
                     error = lineno;
-                abyss_len = strlen(abyss);
-                if (abyss_len > 0 && abyss[abyss_len - 1] == '\n')
+                if (abyss[abyss_len - 1] == '\n')
                     break;
             }
         }
@@ -260,64 +277,37 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
 }
 
 /* See documentation in header file. */
-int ini_parse_file(FILE* file, ini_handler handler, void* user)
+char* ini_slurp(const char* filename, size_t* size)
 {
-    return ini_parse_stream((ini_reader)fgets, file, handler, user);
-}
+    FILE* f;
+    char* buf;
+    long len;
+    size_t n;
 
-/* See documentation in header file. */
-int ini_parse(const char* filename, ini_handler handler, void* user)
-{
-    FILE* file;
-    int error;
+    assert(filename != NULL);
 
-    file = fopen(filename, "r");
-    if (!file)
-        return -1;
-    error = ini_parse_file(file, handler, user);
-    fclose(file);
-    return error;
-}
-
-/* An ini_reader function to read the next line from a string buffer. This
-   is the fgets() equivalent used by ini_parse_string(). */
-static char* ini_reader_string(char* str, int num, void* stream) {
-    ini_parse_string_ctx* ctx = (ini_parse_string_ctx*)stream;
-    const char* ctx_ptr = ctx->ptr;
-    size_t ctx_num_left = ctx->num_left;
-    char* strp = str;
-    char c;
-
-    if (ctx_num_left == 0 || num < 2)
+    f = fopen(filename, "rb");
+    if (!f)
         return NULL;
-
-    while (num > 1 && ctx_num_left != 0) {
-        c = *ctx_ptr++;
-        ctx_num_left--;
-        *strp++ = c;
-        if (c == '\n')
-            break;
-        num--;
+    if (fseek(f, 0, SEEK_END) != 0) {
+        fclose(f);
+        return NULL;
     }
-
-    *strp = '\0';
-    ctx->ptr = ctx_ptr;
-    ctx->num_left = ctx_num_left;
-    return str;
-}
-
-/* See documentation in header file. */
-int ini_parse_string(const char* string, ini_handler handler, void* user) {
-    return ini_parse_string_length(string, strlen(string), handler, user);
-}
-
-/* See documentation in header file. */
-int ini_parse_string_length(const char* string, size_t length,
-                            ini_handler handler, void* user) {
-    ini_parse_string_ctx ctx;
-
-    ctx.ptr = string;
-    ctx.num_left = length;
-    return ini_parse_stream((ini_reader)ini_reader_string, &ctx, handler,
-                            user);
+    len = ftell(f);
+    if (len < 0) {
+        fclose(f);
+        return NULL;
+    }
+    rewind(f);
+    buf = (char*)malloc((size_t)len + 1);
+    if (!buf) {
+        fclose(f);
+        return NULL;
+    }
+    n = fread(buf, 1, (size_t)len, f);
+    buf[n] = '\0';
+    fclose(f);
+    if (size)
+        *size = n;
+    return buf;
 }

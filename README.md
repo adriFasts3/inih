@@ -4,9 +4,7 @@
 
 **inih (INI Not Invented Here)** is a simple [.INI file](http://en.wikipedia.org/wiki/INI_file) parser written in C. It's only a couple of pages of code, and it was designed to be _small and simple_, so it's good for embedded systems. It's also more or less compatible with Python's [ConfigParser](http://docs.python.org/library/configparser.html) style of .INI files, including RFC 822-style multi-line syntax and `name: value` entries.
 
-To use it, just give `ini_parse()` an INI file, and it will call a callback for every `name=value` pair parsed, giving you strings for the section, name, and value. It's done this way ("SAX style") because it works well on low-memory embedded systems, but also because it makes for a KISS implementation.
-
-You can also call `ini_parse_file()` to parse directly from a `FILE*` object, `ini_parse_string()` to parse data from a string, or `ini_parse_stream()` to parse using a custom fgets-style reader function for custom I/O.
+To use it, give `ini_parse_string()` a zero-terminated string containing the INI data, and it will call a callback for every `name=value` pair parsed, giving you strings for the section, name, and value. It's done this way ("SAX style") because it works well on low-memory embedded systems, but also because it makes for a KISS implementation. The library also provides `ini_slurp()` as a convenience to read a file into memory before parsing it.
 
 Download a release, browse the source, or read about [how to use inih in a DRY style](http://blog.brush.co.nz/2009/08/xmacros/) with X-Macros.
 
@@ -42,10 +40,9 @@ You can control various aspects of inih using preprocessor defines:
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../ini.h"
+#include "ini.h"
 
-typedef struct
-{
+typedef struct {
     int version;
     const char* name;
     const char* email;
@@ -54,30 +51,33 @@ typedef struct
 static int handler(void* user, const char* section, const char* name,
                    const char* value)
 {
-    configuration* pconfig = (configuration*)user;
+    configuration* config = (configuration*)user;
+    #define MATCH(s, n) (strcmp(section, s) == 0 && strcmp(name, n) == 0)
 
-    #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
-    if (MATCH("protocol", "version")) {
-        pconfig->version = atoi(value);
-    } else if (MATCH("user", "name")) {
-        pconfig->name = strdup(value);
-    } else if (MATCH("user", "email")) {
-        pconfig->email = strdup(value);
-    } else {
-        return 1;  /* unknown section/name, error */
-    }
+    if      (MATCH("protocol", "version")) config->version = atoi(value);
+    else if (MATCH("user", "name"))        config->name = strdup(value);
+    else if (MATCH("user", "email"))       config->email = strdup(value);
+    else return 1;  /* unknown section/name */
     return 0;
 }
 
-int main(int argc, char* argv[])
+int main(void)
 {
-    configuration config;
+    configuration config = {0};
+    char* contents = ini_slurp("test.ini", NULL);
+    int error;
 
-    if (ini_parse("test.ini", handler, &config) < 0) {
+    if (!contents) {
         printf("Can't load 'test.ini'\n");
         return 1;
     }
-    printf("Config loaded from 'test.ini': version=%d, name=%s, email=%s\n",
+    error = ini_parse_string(contents, handler, &config);
+    free(contents);
+    if (error) {
+        printf("Parse error on line %d\n", error);
+        return 1;
+    }
+    printf("Loaded: version=%d, name=%s, email=%s\n",
         config.version, config.name, config.email);
     return 0;
 }
@@ -94,7 +94,7 @@ Some differences between inih and Python's [ConfigParser](http://docs.python.org
 
 ## Platform-specific notes ##
 
-* Windows/Win32 uses UTF-16 filenames natively, so to handle Unicode paths you need to call `_wfopen()` to open a file and then `ini_parse_file()` to parse it; inih does not include `wchar_t` or Unicode handling.
+* inih does not perform any file I/O. Windows/Win32 uses UTF-16 filenames natively, so to handle Unicode paths you can call `_wfopen()` to open a file, read its contents into memory, and pass them to `ini_parse_string()`; inih does not include `wchar_t` or Unicode handling.
 
 ## Meson notes ##
 

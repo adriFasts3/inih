@@ -1,6 +1,7 @@
 /* Parse a configuration file into a struct using X-Macros */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../ini.h"
 
@@ -39,8 +40,10 @@ void dump_config(config *cfg)
 
 int main(int argc, char* argv[])
 {
-    if (ini_parse("test.ini", handler, &Config) < 0)
+    char* contents = ini_slurp("test.ini", NULL);
+    if (!contents || ini_parse_string(contents, handler, &Config) < 0)
         printf("Can't load 'test.ini', using defaults\n");
+    free(contents);
     dump_config(&Config);
     return 0;
 }

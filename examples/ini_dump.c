@@ -1,6 +1,7 @@
 /* ini.h example that simply dumps an INI file without comments */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../ini.h"
 
@@ -20,6 +21,7 @@ static int dumper(void* user, const char* section, const char* name,
 
 int main(int argc, char* argv[])
 {
+    char* contents;
     int error;
 
     if (argc <= 1) {
@@ -27,12 +29,14 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    error = ini_parse(argv[1], dumper, NULL);
-    if (error < 0) {
+    contents = ini_slurp(argv[1], NULL);
+    if (!contents) {
         printf("Can't read '%s'!\n", argv[1]);
         return 2;
     }
-    else if (error) {
+    error = ini_parse_string(contents, dumper, NULL);
+    free(contents);
+    if (error) {
         printf("Bad config file (first error on line %d)!\n", error);
         return 3;
     }

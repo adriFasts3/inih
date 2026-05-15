@@ -56,10 +56,17 @@ int dumper(void* user, const char* section, const char* name,
 
 void parse(const char* fname) {
     static int u = 100;
+    char* contents;
     int e;
 
     *Prev_section = '\0';
-    e = ini_parse(fname, dumper, &u);
+    contents = ini_slurp(fname, NULL);
+    if (!contents) {
+        e = -1;
+    } else {
+        e = ini_parse_string(contents, dumper, &u);
+        free(contents);
+    }
     printf("%s: e=%d user=%d\n", fname, e, User);
     u++;
 }
