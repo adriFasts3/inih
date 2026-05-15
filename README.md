@@ -83,10 +83,6 @@ Some differences between inih and Python's [ConfigParser](http://docs.python.org
 * Multi-line value continuations are not supported; each `name=value` must fit on a single line.
 
 
-## Platform-specific notes ##
-
-* inih does not perform any file I/O. Windows/Win32 uses UTF-16 filenames natively, so to handle Unicode paths you can call `_wfopen()` to open a file, read its contents into memory, and pass them to `ini_parse_string()`; inih does not include `wchar_t` or Unicode handling.
-
 ## Meson notes ##
 
 * The `meson.build` file is not required to use or compile inih, its main purpose is for distributions.

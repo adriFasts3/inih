@@ -21,24 +21,13 @@ https://github.com/benhoyt/inih
 #define INI_HANDLER_LINENO 0
 #endif
 
-/* Visibility symbols, required for Windows DLLs */
+/* Visibility for exported symbols (paired with meson's gnu_symbol_visibility:
+   'hidden' to keep internal helpers private). */
 #ifndef INI_API
-#if defined _WIN32 || defined __CYGWIN__
-#	ifdef INI_SHARED_LIB
-#		ifdef INI_SHARED_LIB_BUILDING
-#			define INI_API __declspec(dllexport)
-#		else
-#			define INI_API __declspec(dllimport)
-#		endif
-#	else
-#		define INI_API
-#	endif
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define INI_API __attribute__ ((visibility ("default")))
 #else
-#	if defined(__GNUC__) && __GNUC__ >= 4
-#		define INI_API __attribute__ ((visibility ("default")))
-#	else
-#		define INI_API
-#	endif
+#define INI_API
 #endif
 #endif
 

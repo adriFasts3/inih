@@ -9,7 +9,6 @@ project('inih',
 #### options ####
 arg_static = []
 distro_install = get_option('distro_install')
-extra_args = []
 
 if distro_install
     pkg = import('pkgconfig')
@@ -35,16 +34,6 @@ else
     endif
 endif
 
-if host_machine.system() == 'windows'
-    lib = get_option('default_library')
-    if lib == 'both'
-        error('default_library=both is not supported on Windows')
-    elif lib == 'shared'
-        extra_args += '-DINI_SHARED_LIB'
-        add_project_arguments('-DINI_SHARED_LIB_BUILDING', language: ['c'])
-    endif
-endif
-
 #### inih ####
 inc_inih = include_directories('.')
 
@@ -53,7 +42,7 @@ src_inih = files('ini.c')
 lib_inih = library('inih',
     [src_inih],
     include_directories : inc_inih,
-    c_args : [arg_static, extra_args],
+    c_args : arg_static,
     install : distro_install,
     soversion : '0',
     gnu_symbol_visibility: 'hidden'
@@ -65,13 +54,12 @@ if distro_install
     pkg.generate(lib_inih,
         name : 'inih',
         description : 'simple .INI file parser',
-        extra_cflags : extra_args,
     )
 endif
 
 inih_dep = declare_dependency(
     link_with : lib_inih,
-    compile_args : arg_static + extra_args,
+    compile_args : arg_static,
     include_directories : inc_inih
 )
 
