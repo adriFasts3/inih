@@ -18,16 +18,6 @@ option('utf-8_bom',
   value : true,
   description : 'allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of INI files'
 )
-option('inline_comments',
-  type : 'boolean',
-  value : true,
-  description : 'allow inline comments with the comment prefix character'
-)
-option('inline_comment_prefix',
-  type : 'string',
-  value : ';',
-  description : 'character(s) to start an inline comment (if enabled)'
-)
 option('start-of-line_comment_prefix',
   type : 'string',
   value : ';#',

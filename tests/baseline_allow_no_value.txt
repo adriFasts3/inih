@@ -1,17 +1,17 @@
 no_file.ini: e=-1 user=0
 ... [section1]
-... one=This is a test;
+... one=This is a test  ; name=value comment;
 ... two=1234;
 ... [ section 2 ]
 ... happy=4;
 ... sad=;
 ... [comment_test]
-... test1=1;2;3;
-... test2=2;3;4;this won't be a comment, needs whitespace before ';';
-... test;3=345;
-... test4=4#5#6;
-... test7=;
-... test8=; not a comment, needs whitespace before ';';
+... test1=1;2;3 ; trailing ';' is part of the value (no inline comments);
+... test2=2;3;4;embedded semicolons are part of the value;
+... test;3=345 ; key should be "test;3";
+... test4=4#5#6 ; '#' only starts a comment at start of line;
+... test7=; trailing ';' is part of the value (no inline comments);
+... test8=; trailing ';' is part of the value (no inline comments);
 ... [colon_tests]
 ... Content-Type=text/html;
 ... foo=bar;
@@ -23,6 +23,7 @@ no_file.ini: e=-1 user=0
 normal.ini: e=0 user=101
 ... [section1]
 ... name1=value1;
+... [section3   ; comment ]
 ... name2=value2;
 bad_section.ini: e=3 user=102
 ... This is an error;
@@ -45,9 +46,9 @@ user_error.ini: e=3 user=104
 ... single=ghi;
 ... multi=the quick;
 ... multi=brown fox;
-... name=bob smith;
-... foo=bar;
-... foo=Hi World;
+... name=bob smith  ; comment line 1;
+... foo=bar ;c1;
+... foo=Hi World ;c2;
 multi_line.ini: e=0 user=105
 ... indented;
 bad_multi.ini: e=0 user=106

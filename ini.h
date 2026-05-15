@@ -102,16 +102,6 @@ INI_API char* ini_slurp(const char* filename, size_t* size);
 #define INI_START_COMMENT_PREFIXES ";#"
 #endif
 
-/* Nonzero to allow inline comments (with valid inline comment characters
-   specified by INI_INLINE_COMMENT_PREFIXES). Set to 0 to turn off and match
-   Python 3.2+ configparser behaviour. */
-#ifndef INI_ALLOW_INLINE_COMMENTS
-#define INI_ALLOW_INLINE_COMMENTS 1
-#endif
-#ifndef INI_INLINE_COMMENT_PREFIXES
-#define INI_INLINE_COMMENT_PREFIXES ";"
-#endif
-
 /* Nonzero to use stack for line buffer, zero to use heap (malloc/free). */
 #ifndef INI_USE_STACK
 #define INI_USE_STACK 1

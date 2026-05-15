@@ -20,13 +20,6 @@ else
     if not get_option('utf-8_bom')
         arg_static += ['-DINI_ALLOW_BOM=0']
     endif
-    if not get_option('inline_comments')
-        arg_static += ['-DINI_ALLOW_INLINE_COMMENTS=0']
-    endif
-    inline_comment_prefix = get_option('inline_comment_prefix')
-    if inline_comment_prefix != ';'
-        arg_static += ['-DINI_INLINE_COMMENT_PREFIXES="' + inline_comment_prefix + '"']
-    endif
     sol_comment_prefix = get_option('start-of-line_comment_prefix')
     if sol_comment_prefix != ';#'
         arg_static += ['-DINI_START_COMMENT_PREFIXES="' + sol_comment_prefix + '"']

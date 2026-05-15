@@ -43,23 +43,13 @@ static char* ini_lskip(const char* s)
     return (char*)s;
 }
 
-/* Return pointer to first char (of chars) or inline comment in given string,
-   or pointer to NUL at end of string if neither found. Inline comment must
-   be prefixed by a whitespace character to register as a comment. */
-static char* ini_find_chars_or_comment(const char* s, const char* chars)
+/* Return pointer to first char (of chars) in given string, or pointer to
+   NUL at end of string if not found. */
+static char* ini_find_chars(const char* s, const char* chars)
 {
-#if INI_ALLOW_INLINE_COMMENTS
-    int was_space = 0;
-    while (*s && (!chars || !strchr(chars, *s)) &&
-           !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
-        was_space = isspace((unsigned char)(*s));
+    while (*s && !strchr(chars, *s)) {
         s++;
     }
-#else
-    while (*s && (!chars || !strchr(chars, *s))) {
-        s++;
-    }
-#endif
     return (char*)s;
 }
 
@@ -198,11 +188,6 @@ int ini_parse_string(const char* string, ini_handler handler, void* user)
         }
 #if INI_ALLOW_MULTILINE
         else if (*prev_name && *start && start > line) {
-#if INI_ALLOW_INLINE_COMMENTS
-            end = ini_find_chars_or_comment(start, NULL);
-            *end = '\0';
-            ini_rstrip(start, end);
-#endif
             /* Non-blank line with leading whitespace, treat as continuation
                of previous name's value (as per Python configparser). */
             if (HANDLER(user, section, prev_name, start) && !error)
@@ -211,7 +196,7 @@ int ini_parse_string(const char* string, ini_handler handler, void* user)
 #endif
         else if (*start == '[') {
             /* A "[section]" line */
-            end = ini_find_chars_or_comment(start + 1, "]");
+            end = ini_find_chars(start + 1, "]");
             if (*end == ']') {
                 *end = '\0';
                 ini_strncpy0(section, start + 1, sizeof(section));
@@ -230,15 +215,12 @@ int ini_parse_string(const char* string, ini_handler handler, void* user)
         }
         else if (*start) {
             /* Not a comment, must be a name[=:]value pair */
-            end = ini_find_chars_or_comment(start, "=:");
+            end = ini_find_chars(start, "=:");
             if (*end == '=' || *end == ':') {
                 *end = '\0';
                 name = ini_rstrip(start, end);
                 value = end + 1;
-#if INI_ALLOW_INLINE_COMMENTS
-                end = ini_find_chars_or_comment(value, NULL);
-                *end = '\0';
-#endif
+                end = value + strlen(value);
                 value = ini_lskip(value);
                 ini_rstrip(value, end);
 
