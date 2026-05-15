@@ -15,7 +15,7 @@ static int dumper(void* user, const char* section, const char* name,
         prev_section[sizeof(prev_section) - 1] = '\0';
     }
     printf("%s = %s\n", name, value);
-    return 1;
+    return 0;
 }
 
 int main(int argc, char* argv[])

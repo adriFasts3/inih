@@ -198,7 +198,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
 #endif
             /* Non-blank line with leading whitespace, treat as continuation
                of previous name's value (as per Python configparser). */
-            if (!HANDLER(user, section, prev_name, start) && !error)
+            if (HANDLER(user, section, prev_name, start) && !error)
                 error = lineno;
         }
 #endif
@@ -212,7 +212,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
                 *prev_name = '\0';
 #endif
 #if INI_CALL_HANDLER_ON_NEW_SECTION
-                if (!HANDLER(user, section, NULL, NULL) && !error)
+                if (HANDLER(user, section, NULL, NULL) && !error)
                     error = lineno;
 #endif
             }
@@ -239,7 +239,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
                 ini_strncpy0(prev_name, name, sizeof(prev_name));
 #endif
                 /* Valid name[=:]value pair found, call handler */
-                if (!HANDLER(user, section, name, value) && !error)
+                if (HANDLER(user, section, name, value) && !error)
                     error = lineno;
             }
             else {
@@ -247,7 +247,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
 #if INI_ALLOW_NO_VALUE
                 *end = '\0';
                 name = ini_rstrip(start, end);
-                if (!HANDLER(user, section, name, NULL) && !error)
+                if (HANDLER(user, section, name, NULL) && !error)
                     error = lineno;
 #else
                 if (!error)

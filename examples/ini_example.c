@@ -25,9 +25,9 @@ static int handler(void* user, const char* section, const char* name,
     } else if (MATCH("user", "email")) {
         pconfig->email = strdup(value);
     } else {
-        return 0;  /* unknown section/name, error */
+        return 1;  /* unknown section/name, error */
     }
-    return 1;
+    return 0;
 }
 
 int main(int argc, char* argv[])

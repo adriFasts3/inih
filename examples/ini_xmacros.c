@@ -27,7 +27,7 @@ int handler(void *user, const char *section, const char *name,
         strcmp(name, #n) == 0) cfg->s##_##n = strdup(value);
     #include "config.def"
 
-    return 1;
+    return 0;
 }
 
 /* print all the variables in the config, one per line */

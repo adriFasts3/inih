@@ -35,7 +35,7 @@ int dumper(void* user, const char* section, const char* name,
         Prev_section[sizeof(Prev_section) - 1] = '\0';
     }
     printf("... %s=%s;\n", name, value);
-    return 1;
+    return 0;
 }
 
 void parse(const char* name, const char* string) {

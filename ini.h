@@ -48,6 +48,8 @@ https://github.com/benhoyt/inih
    may cast to "char*" and modify its content, as the value is not used again
    after the call to ini_handler. This is not true of section and name --
    those must not be modified.
+
+   Handler should return 0 on success, nonzero on error.
 */
 #if INI_HANDLER_LINENO
 typedef int (*ini_handler)(void* user, const char* section,
@@ -68,11 +70,12 @@ typedef char* (*ini_reader)(char* str, int num, void* stream);
 
    For each name=value pair parsed, call handler function with given user
    pointer as well as section, name, and value (data only valid for duration
-   of handler call). Handler should return nonzero on success, zero on error.
+   of handler call). Handler should return 0 on success, nonzero on error.
 
-   Returns 0 on success, line number of first error on parse error (doesn't
-   stop on first error), -1 on file open error, or -2 on memory allocation
-   error (only when INI_USE_STACK is zero).
+   Returns 0 on success; otherwise nonzero: a positive line number for the
+   first parse error (parsing does not stop on first error by default), -1
+   on file open error, or -2 on memory allocation error (only when
+   INI_USE_STACK is zero).
 */
 INI_API int ini_parse(const char* filename, ini_handler handler, void* user);
 
