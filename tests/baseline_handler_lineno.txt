@@ -35,20 +35,15 @@ user_error.ini: e=3 user=104
 ... [section1]
 ... single1=abc;  line 2
 ... multi=this is a;  line 3
-... multi=multi-line value;  line 4
 ... single2=xyz;  line 5
 ... [section2]
 ... multi=a;  line 7
-... multi=b;  line 8
-... multi=c;  line 9
 ... [section3]
 ... single=ghi;  line 11
 ... multi=the quick;  line 12
-... multi=brown fox;  line 13
 ... name=bob smith  ; comment line 1;  line 14
 ... foo=bar ;c1;  line 16
-... foo=Hi World ;c2;  line 17
-multi_line.ini: e=0 user=105
+multi_line.ini: e=4 user=105
 bad_multi.ini: e=1 user=105
 ... [bom_section]
 ... bom_name=bom_value;  line 2

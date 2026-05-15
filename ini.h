@@ -83,13 +83,6 @@ INI_API int ini_parse_string(const char* string, ini_handler handler, void* user
    returned buffer. */
 INI_API char* ini_slurp(const char* filename, size_t* size);
 
-/* Nonzero to allow multi-line value parsing, in the style of Python's
-   configparser. If allowed, the parser will call the handler with the same
-   name for each subsequent line parsed. */
-#ifndef INI_ALLOW_MULTILINE
-#define INI_ALLOW_MULTILINE 1
-#endif
-
 /* Nonzero to allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of
    the file. See https://github.com/benhoyt/inih/issues/21 */
 #ifndef INI_ALLOW_BOM

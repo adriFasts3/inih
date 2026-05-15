@@ -8,11 +8,6 @@ option('examples',
   value : false,
   description : 'build the example programs'
 )
-option('multi-line_entries',
-  type : 'boolean',
-  value : true,
-  description : 'support for multi-line entries in the style of Python\'s ConfigParser'
-)
 option('utf-8_bom',
   type : 'boolean',
   value : true,

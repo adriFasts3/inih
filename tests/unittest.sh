@@ -10,10 +10,6 @@ $CC ../ini.c -DINI_MAX_LINE=20 unittest.c -o unittest_multi_max_line
 ./unittest_multi_max_line > baseline_multi_max_line.txt
 rm -f unittest_multi_max_line
 
-$CC ../ini.c -DINI_ALLOW_MULTILINE=0 unittest.c -o unittest_single
-./unittest_single > baseline_single.txt
-rm -f unittest_single
-
 $CC ../ini.c -DINI_STOP_ON_FIRST_ERROR=1 unittest.c -o unittest_stop_on_first_error
 ./unittest_stop_on_first_error > baseline_stop_on_first_error.txt
 rm -f unittest_stop_on_first_error

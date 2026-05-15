@@ -14,9 +14,6 @@ extra_args = []
 if distro_install
     pkg = import('pkgconfig')
 else
-    if not get_option('multi-line_entries')
-        arg_static += ['-DINI_ALLOW_MULTILINE=0']
-    endif
     if not get_option('utf-8_bom')
         arg_static += ['-DINI_ALLOW_BOM=0']
     endif

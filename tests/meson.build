@@ -6,7 +6,6 @@ endif
 tests = {
   'multi': { 'args': [] },
   'multi_max_line': { 'args': ['-DINI_MAX_LINE=20'] },
-  'single': { 'args': ['-DINI_ALLOW_MULTILINE=0'] },
   'stop_on_first_error': { 'args': ['-DINI_STOP_ON_FIRST_ERROR=1'] },
   'handler_lineno': { 'args': ['-DINI_HANDLER_LINENO=1'] },
   'string': { 'src': 'unittest_string.c', 'args': ['-DINI_MAX_LINE=20'] },

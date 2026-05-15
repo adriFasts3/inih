@@ -24,7 +24,6 @@ https://github.com/benhoyt/inih
 #include "ini.h"
 
 #define MAX_SECTION 50
-#define MAX_NAME 50
 
 /* Strip whitespace chars off end of given string, in place. end must be a
    pointer to the NUL terminator at the end of the string. Return s. */
@@ -104,9 +103,6 @@ int ini_parse_string(const char* string, ini_handler handler, void* user)
     char* new_line;
 #endif
     char section[MAX_SECTION] = "";
-#if INI_ALLOW_MULTILINE
-    char prev_name[MAX_NAME] = "";
-#endif
 
     const char* ptr;
     size_t num_left;
@@ -186,23 +182,12 @@ int ini_parse_string(const char* string, ini_handler handler, void* user)
         if (strchr(INI_START_COMMENT_PREFIXES, *start)) {
             /* Start-of-line comment */
         }
-#if INI_ALLOW_MULTILINE
-        else if (*prev_name && *start && start > line) {
-            /* Non-blank line with leading whitespace, treat as continuation
-               of previous name's value (as per Python configparser). */
-            if (HANDLER(user, section, prev_name, start) && !error)
-                error = lineno;
-        }
-#endif
         else if (*start == '[') {
             /* A "[section]" line */
             end = ini_find_chars(start + 1, "]");
             if (*end == ']') {
                 *end = '\0';
                 ini_strncpy0(section, start + 1, sizeof(section));
-#if INI_ALLOW_MULTILINE
-                *prev_name = '\0';
-#endif
 #if INI_CALL_HANDLER_ON_NEW_SECTION
                 if (HANDLER(user, section, NULL, NULL) && !error)
                     error = lineno;
@@ -224,9 +209,6 @@ int ini_parse_string(const char* string, ini_handler handler, void* user)
                 value = ini_lskip(value);
                 ini_rstrip(value, end);
 
-#if INI_ALLOW_MULTILINE
-                ini_strncpy0(prev_name, name, sizeof(prev_name));
-#endif
                 /* Valid name[=:]value pair found, call handler */
                 if (HANDLER(user, section, name, value) && !error)
                     error = lineno;
