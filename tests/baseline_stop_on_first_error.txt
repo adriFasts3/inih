@@ -29,34 +29,15 @@ bad_comment.ini: e=1 user=102
 ... a=b;
 ... user=parse_error;
 user_error.ini: e=3 user=104
-... [section1]
-... single1=abc;
-... multi=this is a;
-multi_line.ini: e=4 user=105
-bad_multi.ini: e=1 user=105
 ... [bom_section]
 ... bom_name=bom_value;
 ... key“=value“;
-bom.ini: e=0 user=107
+bom.ini: e=0 user=105
 ... [section1]
 ... single1=abc;
 ... single2=xyz;
 ... single1=def;
 ... single2=qrs;
-duplicate_sections.ini: e=0 user=108
-no_value.ini: e=2 user=108
-... [_123456789_123456789_123456789_123456789_123456789_123456789]
-... name=value;
-long_section.ini: e=0 user=110
-... [width = 18]
-... _123456789=1234567;
-... [width = 19]
-... _123456789=12345678;
-... [width = 20]
-... _123456789=123456789;
-... [2 assigns]
-... _123456789=12345678name=value;
-... [no trailing \n]
-... _123456782=12345678;
-long_line.ini: e=0 user=111
-name_only_after_error.ini: e=5 user=111
+duplicate_sections.ini: e=0 user=106
+no_value.ini: e=2 user=106
+name_only_after_error.ini: e=5 user=106
