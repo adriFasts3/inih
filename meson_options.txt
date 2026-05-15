@@ -3,10 +3,10 @@ option('distro_install',
   value : true,
   description : 'install shared libs, headers and pkg-config entries'
 )
-option('with_INIReader',
+option('examples',
   type : 'boolean',
-  value : true,
-  description : 'compile and (if selected) install INIReader'
+  value : false,
+  description : 'build the example programs'
 )
 option('multi-line_entries',
   type : 'boolean',

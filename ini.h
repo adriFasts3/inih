@@ -14,11 +14,6 @@ https://github.com/benhoyt/inih
 #ifndef INI_H
 #define INI_H
 
-/* Make this header file easier to include in C++ code */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 
 /* Nonzero if ini_handler callback should accept lineno parameter. */
@@ -98,7 +93,7 @@ INI_API int ini_parse_string(const char* string, ini_handler handler, void* user
 
 /* Same as ini_parse_string(), but takes a string and its length, avoiding
    strlen(). Useful for parsing INI data from a network socket or which is
-   already in memory, or interfacing with C++ std::string_view. */
+   already in memory. */
 INI_API int ini_parse_string_length(const char* string, size_t length, ini_handler handler, void* user);
 
 /* Nonzero to allow multi-line value parsing, in the style of Python's
@@ -181,9 +176,5 @@ INI_API int ini_parse_string_length(const char* string, size_t length, ini_handl
 #define INI_CUSTOM_ALLOCATOR 0
 #endif
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* INI_H */

@@ -17,8 +17,6 @@ jobs:
       run: |
         cd tests
         ./unittest.sh
-        cd ../examples
-        ./cpptest.sh
         git diff --exit-code
 
   build-meson:

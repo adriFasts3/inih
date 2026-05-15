@@ -1,10 +1,7 @@
-runtest = files(join_paths(meson.project_source_root(), 'tests', 'runtest.sh'))
+examples = ['ini_example', 'ini_dump', 'ini_xmacros']
 
-tests = {
-  'INIReaderExample': { 'args': [] },
-}
-
-foreach name, properties : tests
-  exe = executable('unittest_' + name, src_inih, src_INIReader, 'INIReaderExample.cpp', cpp_args : ['-Wall', properties['args']])
-  test('test_' + name, runtest, depends : [exe], args : [files('cpptest.txt'), exe.full_path()])
+foreach name : examples
+  executable(name, src_inih, name + '.c',
+    include_directories : inc_inih,
+    c_args : [arg_static, extra_args, '-Wall'])
 endforeach

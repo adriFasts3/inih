@@ -2,7 +2,7 @@ project('inih',
     ['c'],
     license : 'BSD-3-Clause',
     version : '62',
-    default_options : ['cpp_std=c++11'],
+    default_options : ['c_std=c11'],
     meson_version: '>=0.56.0'
 )
 
@@ -65,7 +65,7 @@ if host_machine.system() == 'windows'
         error('default_library=both is not supported on Windows')
     elif lib == 'shared'
         extra_args += '-DINI_SHARED_LIB'
-        add_project_arguments('-DINI_SHARED_LIB_BUILDING', language: ['c', 'cpp'])
+        add_project_arguments('-DINI_SHARED_LIB_BUILDING', language: ['c'])
     endif
 endif
 
@@ -103,41 +103,6 @@ if get_option('tests')
     subdir('tests')
 endif
 
-#### INIReader ####
-if get_option('with_INIReader')
-    add_languages(
-        'cpp',
-        native : false
-    )
-    inc_INIReader = include_directories('cpp')
-
-    src_INIReader = files(join_paths('cpp', 'INIReader.cpp'))
-
-    lib_INIReader = library('INIReader',
-        src_INIReader,
-        cpp_args : extra_args,
-        include_directories : inc_INIReader,
-        dependencies : inih_dep,
-        install : distro_install,
-        soversion : '0',
-        gnu_symbol_visibility: 'hidden'
-    )
-
-    if distro_install
-        install_headers('cpp/INIReader.h')
-
-        pkg.generate(lib_INIReader,
-            name : 'INIReader',
-            description : 'simple .INI file parser for C++',
-            extra_cflags : extra_args,
-        )
-    endif
-
-    INIReader_dep = declare_dependency(
-        link_with : lib_INIReader,
-        include_directories : inc_INIReader,
-        compile_args : extra_args
-    )
-
+if get_option('examples')
     subdir('examples')
 endif
