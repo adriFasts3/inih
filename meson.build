@@ -13,13 +13,6 @@ distro_install = get_option('distro_install')
 if distro_install
     pkg = import('pkgconfig')
 else
-    if not get_option('utf-8_bom')
-        arg_static += ['-DINI_ALLOW_BOM=0']
-    endif
-    sol_comment_prefix = get_option('start-of-line_comment_prefix')
-    if sol_comment_prefix != ';#'
-        arg_static += ['-DINI_START_COMMENT_PREFIXES="' + sol_comment_prefix + '"']
-    endif
     if get_option('allow_no_value')
         arg_static += ['-DINI_ALLOW_NO_VALUE=1']
     endif

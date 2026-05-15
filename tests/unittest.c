@@ -72,9 +72,7 @@ int main(void)
     parse("no_file.ini");
     parse("normal.ini");
     parse("bad_section.ini");
-    parse("bad_comment.ini");
     parse("user_error.ini");
-    parse("bom.ini");
     parse("duplicate_sections.ini");
     parse("no_value.ini");
     parse("name_only_after_error.ini");

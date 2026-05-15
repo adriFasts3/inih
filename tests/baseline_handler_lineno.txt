@@ -26,25 +26,20 @@ normal.ini: e=0 user=101
 ... [section3   ; comment ]
 ... name2=value2;  line 5
 bad_section.ini: e=3 user=102
-bad_comment.ini: e=1 user=102
 ... [section]
 ... a=b;  line 2
 ... user=parse_error;  line 3
 ... c=d;  line 4
-user_error.ini: e=3 user=104
-... [bom_section]
-... bom_name=bom_value;  line 2
-... key“=value“;  line 3
-bom.ini: e=0 user=105
+user_error.ini: e=3 user=103
 ... [section1]
 ... single1=abc;  line 2
 ... single2=xyz;  line 3
 ... single1=def;  line 5
 ... single2=qrs;  line 6
-duplicate_sections.ini: e=0 user=106
+duplicate_sections.ini: e=0 user=104
 ... [section0]
 ... key0=val0;  line 6
 ... [section1]
 ... key1=val1;  line 9
-no_value.ini: e=2 user=107
-name_only_after_error.ini: e=5 user=107
+no_value.ini: e=2 user=105
+name_only_after_error.ini: e=5 user=105

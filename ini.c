@@ -65,14 +65,6 @@ int ini_parse_string(char* string, ini_handler handler, void* user)
 
     p = string;
 
-#if INI_ALLOW_BOM
-    if ((unsigned char)p[0] == 0xEF &&
-        (unsigned char)p[1] == 0xBB &&
-        (unsigned char)p[2] == 0xBF) {
-        p += 3;
-    }
-#endif
-
     while (*p) {
         lineno++;
 
@@ -102,7 +94,7 @@ int ini_parse_string(char* string, ini_handler handler, void* user)
         *line_end = '\0';
 
         if (*line_start == '\0' ||
-                strchr(INI_START_COMMENT_PREFIXES, *line_start)) {
+                *line_start == ';' || *line_start == '#') {
             /* Blank line or start-of-line comment */
         }
         else if (*line_start == '[') {

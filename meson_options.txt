@@ -8,16 +8,6 @@ option('examples',
   value : false,
   description : 'build the example programs'
 )
-option('utf-8_bom',
-  type : 'boolean',
-  value : true,
-  description : 'allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of INI files'
-)
-option('start-of-line_comment_prefix',
-  type : 'string',
-  value : ';#',
-  description : 'character(s) to start a comment at the beginning of a line'
-)
 option('allow_no_value',
   type : 'boolean',
   value : false,
