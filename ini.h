@@ -60,21 +60,25 @@ typedef int (*ini_handler)(void* user, const char* section,
                            const char* name, const char* value);
 #endif
 
-/* Parse a zero-terminated string containing INI data. May have [section]s,
-   name=value pairs (whitespace stripped), and comments starting with ';'
-   (semicolon). Section is "" if name=value pair parsed before any section
-   heading. name:value pairs are also supported as a concession to Python's
-   configparser.
+/* Parse a zero-terminated, writable string containing INI data. May have
+   [section]s, name=value pairs (whitespace stripped), and comments starting
+   with ';' (semicolon). Section is "" if name=value pair parsed before any
+   section heading. name:value pairs are also supported as a concession to
+   Python's configparser.
+
+   The buffer is parsed in place: section, name, and value pointers passed
+   to the handler point into `string`. The parser writes NUL terminators at
+   token boundaries, then restores the byte at each line end so the buffer's
+   line structure is preserved on return.
 
    For each name=value pair parsed, call handler function with given user
    pointer as well as section, name, and value (data only valid for duration
    of handler call). Handler should return 0 on success, nonzero on error.
 
-   Returns 0 on success; otherwise nonzero: a positive line number for the
-   first parse error (parsing does not stop on first error by default), or
-   -2 on memory allocation error (only when INI_USE_STACK is zero).
+   Returns 0 on success, or a positive line number for the first parse error
+   (parsing does not stop on first error by default).
 */
-INI_API int ini_parse_string(const char* string, ini_handler handler, void* user);
+INI_API int ini_parse_string(char* string, ini_handler handler, void* user);
 
 /* Read the entire file at `filename` into a freshly malloc'd, NUL-terminated
    buffer suitable for ini_parse_string(). If `size` is non-NULL, the number
@@ -93,30 +97,6 @@ INI_API char* ini_slurp(const char* filename, size_t* size);
    both ; and # comments at the start of a line by default. */
 #ifndef INI_START_COMMENT_PREFIXES
 #define INI_START_COMMENT_PREFIXES ";#"
-#endif
-
-/* Nonzero to use stack for line buffer, zero to use heap (malloc/free). */
-#ifndef INI_USE_STACK
-#define INI_USE_STACK 1
-#endif
-
-/* Maximum line length for any line in INI file (stack or heap). Note that
-   this must be 3 more than the longest line (due to '\r', '\n', and '\0'). */
-#ifndef INI_MAX_LINE
-#define INI_MAX_LINE 200
-#endif
-
-/* Nonzero to allow heap line buffer to grow via realloc(), zero for a
-   fixed-size buffer of INI_MAX_LINE bytes. Only applies if INI_USE_STACK is
-   zero. */
-#ifndef INI_ALLOW_REALLOC
-#define INI_ALLOW_REALLOC 0
-#endif
-
-/* Initial size in bytes for heap line buffer. Only applies if INI_USE_STACK
-   is zero. */
-#ifndef INI_INITIAL_ALLOC
-#define INI_INITIAL_ALLOC 200
 #endif
 
 /* Stop parsing on first error (default is to keep parsing). */

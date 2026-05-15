@@ -27,10 +27,13 @@ int dumper(void* user, const char* section, const char* name,
 
 void parse(const char* name, const char* string) {
     static int u = 100;
+    char* buf;
     int e;
 
     *Prev_section = '\0';
-    e = ini_parse_string(string, dumper, &u);
+    buf = strdup(string);
+    e = ini_parse_string(buf, dumper, &u);
+    free(buf);
     printf("%s: e=%d user=%d\n", name, e, User);
     u++;
 }

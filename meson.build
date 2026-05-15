@@ -33,20 +33,6 @@ else
     if get_option('call_handler_on_new_section')
         arg_static += ['-DINI_CALL_HANDLER_ON_NEW_SECTION=1']
     endif
-    if get_option('use_heap')
-        arg_static += ['-DINI_USE_STACK=0']
-    endif
-    max_line_length = get_option('max_line_length')
-    if max_line_length != 200
-        arg_static += ['-DINI_MAX_LINE=' + max_line_length.to_string()]
-    endif
-    initial_malloc_size = get_option('initial_malloc_size')
-    if initial_malloc_size != 200
-        arg_static += ['-DINI_INITIAL_ALLOC=' + initial_malloc_size.to_string()]
-    endif
-    if get_option('allow_realloc')
-        arg_static += ['-DINI_ALLOW_REALLOC=1']
-    endif
 endif
 
 if host_machine.system() == 'windows'

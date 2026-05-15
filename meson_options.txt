@@ -38,26 +38,6 @@ option('call_handler_on_new_section',
   value : false,
   description : 'call the handler each time a new section is encountered'
 )
-option('use_heap',
-  type : 'boolean',
-  value : false,
-  description : 'allocate memory on the heap using malloc instead using a fixed-sized line buffer on the stack'
-)
-option('max_line_length',
-  type : 'integer',
-  value : 200,
-  description : 'maximum line length in bytes'
-)
-option('initial_malloc_size',
-  type : 'integer',
-  value : 200,
-  description : 'initial malloc size in bytes (when using the heap)'
-)
-option('allow_realloc',
-  type : 'boolean',
-  value : false,
-  description : 'allow initial malloc size to grow to max line length (when using the heap)'
-)
 option('tests',
   type : 'boolean',
   value : true,

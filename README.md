@@ -4,7 +4,7 @@
 
 **inih (INI Not Invented Here)** is a simple [.INI file](http://en.wikipedia.org/wiki/INI_file) parser written in C. It's only a couple of pages of code, and it was designed to be _small and simple_, so it's good for embedded systems. It also supports Python [ConfigParser](http://docs.python.org/library/configparser.html)-style `name: value` entries.
 
-To use it, give `ini_parse_string()` a zero-terminated string containing the INI data, and it will call a callback for every `name=value` pair parsed, giving you strings for the section, name, and value. It's done this way ("SAX style") because it works well on low-memory embedded systems, but also because it makes for a KISS implementation. The library also provides `ini_slurp()` as a convenience to read a file into memory before parsing it.
+To use it, give `ini_parse_string()` a zero-terminated, writable string containing the INI data, and it will call a callback for every `name=value` pair parsed, giving you strings for the section, name, and value. The buffer is parsed in place (no copies), so there are no fixed limits on line, section, name, or value lengths. It's done this way ("SAX style") because it works well on low-memory embedded systems, but also because it makes for a KISS implementation. The library also provides `ini_slurp()` as a convenience to read a file into memory before parsing it.
 
 Download a release, browse the source, or read about [how to use inih in a DRY style](http://blog.brush.co.nz/2009/08/xmacros/) with X-Macros.
 
@@ -24,13 +24,6 @@ You can control various aspects of inih using preprocessor defines:
   * **Stop on first error:** By default, inih keeps parsing the rest of the file after an error. To stop parsing on the first error, add `-DINI_STOP_ON_FIRST_ERROR=1`.
   * **Report line numbers:** By default, the `ini_handler` callback doesn't receive the line number as a parameter. If you need that, add `-DINI_HANDLER_LINENO=1`.
   * **Call handler on new section:** By default, inih only calls the handler on each `name=value` pair. To detect new sections (e.g., the INI file has multiple sections with the same name), add `-DINI_CALL_HANDLER_ON_NEW_SECTION=1`. Your handler function will then be called each time a new section is encountered, with `section` set to the new section name but `name` and `value` set to NULL.
-
-### Memory options ###
-
-  * **Stack vs heap:** By default, inih creates a fixed-sized line buffer on the stack. To allocate on the heap using `malloc` instead, specify `-DINI_USE_STACK=0`.
-  * **Maximum line length:** The default maximum line length (for stack or heap) is 200 bytes. To override this, add something like `-DINI_MAX_LINE=1000`. Note that `INI_MAX_LINE` must be 3 more than the longest line (due to `\r`, `\n`, and the NUL).
-  * **Initial malloc size:** `INI_INITIAL_ALLOC` specifies the initial malloc size when using the heap. It defaults to 200 bytes.
-  * **Allow realloc:** By default when using the heap (`-DINI_USE_STACK=0`), inih allocates a fixed-sized buffer of `INI_INITIAL_ALLOC` bytes. To allow this to grow to `INI_MAX_LINE` bytes, doubling if needed, set `-DINI_ALLOW_REALLOC=1`.
 
 ## Simple example in C ##
 
@@ -87,7 +80,7 @@ int main(void)
 Some differences between inih and Python's [ConfigParser](http://docs.python.org/library/configparser.html) standard library module:
 
 * INI name=value pairs given above any section headers are treated as valid items with no section (section name is an empty string). In ConfigParser having no section is an error.
-* Line continuations are handled with leading whitespace on continued lines (like ConfigParser). However, instead of concatenating continued lines together, they are treated as separate values for the same key (unlike ConfigParser).
+* Multi-line value continuations are not supported; each `name=value` must fit on a single line.
 
 
 ## Platform-specific notes ##
