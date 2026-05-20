@@ -5,39 +5,36 @@
 #include <string.h>
 #include "../ini.h"
 
-static int dumper(void* user, const char* section, const char* name,
-                  const char* value)
-{
-    static char prev_section[50] = "";
+#define MAX_SECTION_LEN 50
 
+static int dumper(void* user, const char* section, const char* name,
+                  const char* value) {
+	char *prev_section = (char *)user;
     if (strcmp(section, prev_section)) {
         printf("%s[%s]\n", (prev_section[0] ? "\n" : ""), section);
-        strncpy(prev_section, section, sizeof(prev_section));
-        prev_section[sizeof(prev_section) - 1] = '\0';
+        strncpy(prev_section, section, MAX_SECTION_LEN);
+        prev_section[MAX_SECTION_LEN - 1] = '\0';
     }
     printf("%s = %s\n", name, value);
     return 0;
 }
 
-int main(int argc, char* argv[])
-{
-    char* contents;
-    int error;
-
+int main(int argc, char *argv[]) {
     if (argc <= 1) {
-        printf("Usage: ini_dump filename.ini\n");
+        fprintf(stderr, "Usage: ini_dump filename.ini\n");
         return 1;
     }
 
-    contents = ini_slurp(argv[1], NULL);
+    char *contents = ini_slurp(argv[1], NULL);
     if (!contents) {
-        printf("Can't read '%s'!\n", argv[1]);
+        fprintf(stderr, "Can't read '%s'!\n", argv[1]);
         return 2;
     }
-    error = ini_parse_string(contents, dumper, NULL);
+    char prev_section[MAX_SECTION_LEN] = "";
+    int error = ini_parse_string(contents, dumper, prev_section);
     free(contents);
     if (error) {
-        printf("Bad config file (first error on line %d)!\n", error);
+        fprintf(stderr, "Bad config file (first error on line %d)!\n", error);
         return 3;
     }
     return 0;

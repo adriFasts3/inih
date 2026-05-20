@@ -120,7 +120,13 @@ char* ini_slurp(const char* filename, size_t* size)
             (buf = malloc((size_t)len + 1)) != NULL) {
         rewind(f);
         n = fread(buf, 1, (size_t)len, f);
-        buf[n] = '\0';
+        if (ferror(f)) {
+            free(buf);
+            buf = NULL;
+            n = 0;
+        } else {
+            buf[n] = '\0';
+        }
     }
     fclose(f);
     if (size)

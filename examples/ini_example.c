@@ -8,8 +8,8 @@
 typedef struct
 {
     int version;
-    const char* name;
-    const char* email;
+    char* name;
+    char* email;
 } configuration;
 
 static int handler(void* user, const char* section, const char* name,
@@ -17,7 +17,7 @@ static int handler(void* user, const char* section, const char* name,
 {
     configuration* pconfig = (configuration*)user;
 
-    #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+    #define MATCH(s, n) (strcmp(section, s) == 0 && strcmp(name, n) == 0)
     if (MATCH("protocol", "version")) {
         pconfig->version = atoi(value);
     } else if (MATCH("user", "name")) {
@@ -30,33 +30,28 @@ static int handler(void* user, const char* section, const char* name,
     return 0;
 }
 
-int main(int argc, char* argv[])
+int main(void)
 {
-    configuration config;
+    configuration config = {0};
     char* contents;
-
-    config.version = 0;  /* set defaults */
-    config.name = NULL;
-    config.email = NULL;
+    int rc = 0;
 
     contents = ini_slurp("test.ini", NULL);
     if (!contents) {
         printf("Can't load 'test.ini'\n");
-        return 1;
-    }
-    if (ini_parse_string(contents, handler, &config) < 0) {
-        free(contents);
+        rc = 1;
+    } else if (ini_parse_string(contents, handler, &config) != 0) {
         printf("Can't load 'test.ini'\n");
-        return 1;
+        rc = 1;
+    } else {
+        printf("Config loaded from 'test.ini': version=%d, name=%s, email=%s\n",
+            config.version,
+            config.name ? config.name : "(unset)",
+            config.email ? config.email : "(unset)");
     }
+
     free(contents);
-    printf("Config loaded from 'test.ini': version=%d, name=%s, email=%s\n",
-        config.version, config.name, config.email);
-
-    if (config.name)
-        free((void*)config.name);
-    if (config.email)
-        free((void*)config.email);
-
-    return 0;
+    free(config.name);
+    free(config.email);
+    return rc;
 }

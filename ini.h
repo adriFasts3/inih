@@ -50,10 +50,10 @@ typedef int (*ini_handler)(void* user, const char* section,
 #endif
 
 /* Parse a zero-terminated, writable string containing INI data. May have
-   [section]s, name=value pairs (whitespace stripped), and comments starting
-   with ';' (semicolon). Section is "" if name=value pair parsed before any
-   section heading. name:value pairs are also supported as a concession to
-   Python's configparser.
+   [section]s, name=value pairs (whitespace stripped), and comment lines
+   starting with ';' (semicolon) or '#' (hash). Section is "" if name=value
+   pair parsed before any section heading. name:value pairs are also
+   supported as a concession to Python's configparser.
 
    The buffer is parsed in place and modified: section, name, and value
    pointers passed to the handler point into `string`, with NUL terminators
@@ -71,8 +71,8 @@ INI_API int ini_parse_string(char* string, ini_handler handler, void* user);
 /* Read the entire file at `filename` into a freshly malloc'd, NUL-terminated
    buffer suitable for ini_parse_string(). If `size` is non-NULL, the number
    of bytes read (excluding the trailing NUL) is written to *size. Returns
-   NULL on file-open, seek, or allocation error. The caller must free() the
-   returned buffer. */
+   NULL on file-open, seek, allocation, or read error. The caller must free()
+   the returned buffer. */
 INI_API char* ini_slurp(const char* filename, size_t* size);
 
 /* Stop parsing on first error (default is to keep parsing). */

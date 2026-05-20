@@ -11,11 +11,8 @@ typedef struct {
     #include "config.def"
 } config;
 
-/* create one and fill in its default values */
-config Config = {
-    #define CFG(s, n, default) default,
-    #include "config.def"
-};
+/* zero-initialized; defaults are strdup'd in main so all fields are heap-owned */
+config Config;
 
 /* process a line of the INI file, storing valid values into config struct */
 int handler(void *user, const char *section, const char *name,
@@ -25,10 +22,10 @@ int handler(void *user, const char *section, const char *name,
 
     if (0) ;
     #define CFG(s, n, default) else if (strcmp(section, #s) == 0 && \
-        strcmp(name, #n) == 0) cfg->s##_##n = strdup(value);
+        strcmp(name, #n) == 0) { free(cfg->s##_##n); cfg->s##_##n = strdup(value); return 0; }
     #include "config.def"
-
-    return 0;
+    else
+        return 1;  /* unknown section/name, error */
 }
 
 /* print all the variables in the config, one per line */
@@ -38,12 +35,25 @@ void dump_config(config *cfg)
     #include "config.def"
 }
 
-int main(int argc, char* argv[])
+int main(void)
 {
-    char* contents = ini_slurp("test.ini", NULL);
-    if (!contents || ini_parse_string(contents, handler, &Config) < 0)
+    char* contents;
+    int rc = 0;
+
+    #define CFG(s, n, default) Config.s##_##n = strdup(default);
+    #include "config.def"
+
+    contents = ini_slurp("test.ini", NULL);
+    if (!contents) {
         printf("Can't load 'test.ini', using defaults\n");
+    } else if (ini_parse_string(contents, handler, &Config) != 0) {
+        printf("Parse error in 'test.ini'\n");
+        rc = 1;
+    }
     free(contents);
     dump_config(&Config);
-    return 0;
+
+    #define CFG(s, n, default) free(Config.s##_##n);
+    #include "config.def"
+    return rc;
 }
