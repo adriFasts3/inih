@@ -42,13 +42,10 @@ int ini_parse_string(char* string, ini_handler handler, void* user)
         char* line_eol = strchr(p, '\n');
 
         lineno++;
-        if (line_eol) {
+        if (line_eol)
             p = line_eol + 1;
-        }
-        else {
-            line_eol = p + strlen(p);
-            p = line_eol;
-        }
+        else
+            p = line_eol = p + strlen(p);
 
         /* Trim leading and trailing whitespace; NUL-terminate. */
         while (line_start < line_eol && isspace((unsigned char)*line_start))
@@ -58,11 +55,7 @@ int ini_parse_string(char* string, ini_handler handler, void* user)
             line_end--;
         *line_end = '\0';
 
-        if (*line_start == '\0' ||
-                *line_start == ';' || *line_start == '#') {
-            /* Blank line or start-of-line comment */
-        }
-        else if (*line_start == '[') {
+        if (*line_start == '[') {
             /* A "[section]" line */
             char* close = strchr(line_start + 1, ']');
             if (close) {
@@ -73,12 +66,10 @@ int ini_parse_string(char* string, ini_handler handler, void* user)
                     error = lineno;
 #endif
             }
-            else if (!error) {
-                /* No ']' on section line */
-                error = lineno;
-            }
+            else if (!error)
+                error = lineno; /* No ']' on section line */
         }
-        else {
+        else if (*line_start && *line_start != ';' && *line_start != '#') {
             /* Not a comment, must be a name[=:]value pair */
             char* sep = strpbrk(line_start, "=:");
             if (sep) {
@@ -94,15 +85,11 @@ int ini_parse_string(char* string, ini_handler handler, void* user)
                     error = lineno;
             }
 #if INI_ALLOW_NO_VALUE
-            else {
-                if (HANDLER(user, section, line_start, NULL) && !error)
-                    error = lineno;
-            }
-#else
-            else if (!error) {
-                /* No '=' or ':' on name[=:]value line */
+            else if (HANDLER(user, section, line_start, NULL) && !error)
                 error = lineno;
-            }
+#else
+            else if (!error)
+                error = lineno; /* No '=' or ':' on name[=:]value line */
 #endif
         }
 
@@ -120,32 +107,21 @@ int ini_parse_string(char* string, ini_handler handler, void* user)
 char* ini_slurp(const char* filename, size_t* size)
 {
     FILE* f;
-    char* buf;
+    char* buf = NULL;
     long len;
-    size_t n;
+    size_t n = 0;
 
     assert(filename != NULL);
 
     f = fopen(filename, "rb");
     if (!f)
         return NULL;
-    if (fseek(f, 0, SEEK_END) != 0) {
-        fclose(f);
-        return NULL;
+    if (fseek(f, 0, SEEK_END) == 0 && (len = ftell(f)) >= 0 &&
+            (buf = malloc((size_t)len + 1)) != NULL) {
+        rewind(f);
+        n = fread(buf, 1, (size_t)len, f);
+        buf[n] = '\0';
     }
-    len = ftell(f);
-    if (len < 0) {
-        fclose(f);
-        return NULL;
-    }
-    rewind(f);
-    buf = (char*)malloc((size_t)len + 1);
-    if (!buf) {
-        fclose(f);
-        return NULL;
-    }
-    n = fread(buf, 1, (size_t)len, f);
-    buf[n] = '\0';
     fclose(f);
     if (size)
         *size = n;

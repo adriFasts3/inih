@@ -55,10 +55,9 @@ typedef int (*ini_handler)(void* user, const char* section,
    section heading. name:value pairs are also supported as a concession to
    Python's configparser.
 
-   The buffer is parsed in place: section, name, and value pointers passed
-   to the handler point into `string`. The parser writes NUL terminators at
-   token boundaries, then restores the byte at each line end so the buffer's
-   line structure is preserved on return.
+   The buffer is parsed in place and modified: section, name, and value
+   pointers passed to the handler point into `string`, with NUL terminators
+   written at token and line boundaries. The buffer is not restored.
 
    For each name=value pair parsed, call handler function with given user
    pointer as well as section, name, and value (data only valid for duration

@@ -5,8 +5,7 @@ redirected to an output file (baseline_*.txt) and checked into the Git
 repository. This baseline file is the test output, so the idea is to check it
 once, and if it changes -- look at the diff and see which tests failed.
 
-See unittest.bat and unittest.sh for how to run this (with tcc and gcc,
-respectively).
+See unittest.sh for how to run this.
 
 */
 
