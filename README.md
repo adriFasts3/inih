@@ -2,6 +2,21 @@
 
 [![Tests](https://github.com/benhoyt/inih/actions/workflows/tests.yml/badge.svg)](https://github.com/benhoyt/inih/actions/workflows/tests.yml)
 
+This is a fork and rewrite of [Ben Hoyt's inih](https://github.com/benhoyt/inih), released under the same BSD-3-Clause license. It lives in a separate repository (not a GitHub fork) but preserves the original commit history.
+
+## Why this fork?
+
+The goal is a smaller, simpler, single-purpose `.INI` parser. The codebase has been stripped down to one job: SAX-style in-place parsing of a writable string. In particular, this fork:
+
+- Removes the C++ wrapper — C only.
+- Removes the file and stream parsers, custom allocators, and the internal line buffer; the caller owns the buffer and there are no fixed line, section, name, or value length limits.
+- Removes Windows-specific code paths.
+- Drops compile-time options for multiline values and inline comments; comments are always enabled.
+- Drops BOM handling.
+- Uses consistent return codes and asserts on NULL arguments.
+
+If you need any of the features above, use [the original project](https://github.com/benhoyt/inih) — it is still actively maintained.
+
 **inih (INI Not Invented Here)** is a simple [.INI file](http://en.wikipedia.org/wiki/INI_file) parser written in C. It's only a couple of pages of code, and it was designed to be _small and simple_, so it's good for embedded systems. It also supports Python [ConfigParser](http://docs.python.org/library/configparser.html)-style `name: value` entries. Lines beginning with `;` or `#` are treated as comments.
 
 To use it, give `ini_parse_string()` a zero-terminated, writable string containing the INI data, and it will call a callback for every `name=value` pair parsed, giving you strings for the section, name, and value. The buffer is parsed in place (no copies), so there are no fixed limits on line, section, name, or value lengths. It's done this way ("SAX style") because it works well on low-memory embedded systems, but also because it makes for a KISS implementation. The library also provides `ini_slurp()` as a convenience to read a file into memory before parsing it.

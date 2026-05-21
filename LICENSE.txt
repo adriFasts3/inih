@@ -1,7 +1,11 @@
 
-The "inih" library is distributed under the New BSD license:
+The "inih" library is distributed under the New BSD license.
+
+This is a fork and rewrite of Ben Hoyt's original inih
+(https://github.com/benhoyt/inih).
 
 Copyright (c) 2009, Ben Hoyt
+Copyright (c) 2026, Adriana Castro <adriana.castro@fasts3.io>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
