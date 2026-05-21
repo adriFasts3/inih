@@ -12,13 +12,10 @@ bool dumper(IniState *is, const char *section, const char *name,
             const char *value)
 {
     User = *((int*)is->user);
-    if (!name || strcmp (section, Prev_section)) {
+    if (strcmp (section, Prev_section)) {
         printf ("... [%s]\n", section);
         strncpy (Prev_section, section, sizeof(Prev_section));
         Prev_section[sizeof(Prev_section) - 1] = '\0';
-    }
-    if (!name) {
-        return true;
     }
 
     printf ("... %s%s%s;\n", name, value ? "=" : "", value ? value : "");

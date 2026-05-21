@@ -1,13 +1,14 @@
-empty string: e=0 user=0
+empty string: ok=1 err=0 line=0 user=0
 ... [section]
 ... foo=bar;
 ... bazz=buzz quxx;
-basic: e=0 user=101
+basic: ok=1 err=0 line=3 user=101
 ... [section]
 ... hello=world;
 ... forty_two=42;
-crlf: e=0 user=102
+crlf: ok=1 err=0 line=3 user=102
 ... [s]
 ... a=1;
+... b=;
 ... c=3;
-error: e=3 user=103
+error: ok=1 err=0 line=4 user=103
