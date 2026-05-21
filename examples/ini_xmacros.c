@@ -20,6 +20,9 @@ bool handler(IniState *is, const char *section, const char *name,
 {
     config *cfg = (config *)is->user;
 
+    if (!value) {
+        return false;  /* values required for all known keys */
+    }
     if (0) ;
     #define CFG(s, n, default) else if (strcmp (section, #s) == 0 && \
         strcmp (name, #n) == 0) { free (cfg->s##_##n); cfg->s##_##n = strdup (value); return true; }

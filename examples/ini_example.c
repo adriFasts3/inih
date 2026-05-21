@@ -18,6 +18,9 @@ static bool handler(IniState *is, const char *section, const char *name,
     configuration *pconfig = (configuration*)is->user;
 
     #define MATCH(s, n) (strcmp (section, s) == 0 && strcmp (name, n) == 0)
+    if (!value) {
+        return false;  /* this config requires values for all known keys */
+    }
     if (MATCH ("protocol", "version")) {
         pconfig->version = atoi (value);
     } else if (MATCH ("user", "name")) {

@@ -51,7 +51,6 @@ void parse(const char *fname) {
     contents = ini_slurp (fname, NULL);
     if (!contents) {
         ok = false;
-        is.err = INI_ERROR_UNKNOWN;
         is.lineno = -1;
     } else {
         ok = ini_parse_string (&is, contents);

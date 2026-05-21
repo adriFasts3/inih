@@ -86,15 +86,18 @@ bool ini_parse_string(IniState *is, char *string) {
 				trim_spaces (line_start, sep);
 				char *value = skip_spaces (sep + 1, line_end);
 				if (!is->handler (is, section, line_start, value)) {
+					is->err = INI_ERROR_INVALID_DEF;
 					return false;
 				}
 			}
 			else if (!is->handler (is, section, line_start, NULL)) {
+				is->err = INI_ERROR_INVALID_DEF;
 				return false;
 			}
 		}
 	}
 
+	is->err = INI_OK;
 	return true;
 }
 

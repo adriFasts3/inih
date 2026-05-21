@@ -34,10 +34,11 @@ typedef bool (*IniHandler)(struct IniState *is, const char *section,
                            const char *name, const char *value);
 
 typedef enum {
-	INI_ERROR_UNKNOWN = 0,
+	INI_OK = 0,
 	INI_ERROR_INVALID_ARGS = 1,
 	INI_ERROR_MISSING_BRACKET = 2,
-	INI_ERROR_KVDEF = 3,
+	INI_ERROR_INVALID_DEF = 3,
+	INI_ERROR_UNKNOWN = 4,
 } IniError;
 
 typedef struct IniState {
