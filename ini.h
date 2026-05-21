@@ -14,12 +14,36 @@ https://github.com/benhoyt/inih
 #ifndef INI_H
 #define INI_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
-/* Nonzero if ini_handler callback should accept lineno parameter. */
-#ifndef INI_HANDLER_LINENO
-#define INI_HANDLER_LINENO 0
-#endif
+struct IniState;
+
+/* Typedef for prototype of handler function.
+
+   Note that even though the value parameter has type "const char*", the user
+   may cast to "char*" and modify its content, as the value is not used again
+   after the call to IniHandler. This is not true of section and name --
+   those must not be modified.
+
+   Handler should return true to continue parsing, false to stop.
+*/
+typedef bool (*IniHandler)(struct IniState *is, const char *section,
+                           const char *name, const char *value);
+
+typedef enum {
+	INI_ERROR_UNKNOWN = 0,
+	INI_ERROR_INVALID_ARGS = 1,
+	INI_ERROR_MISSING_BRACKET = 2,
+	INI_ERROR_KVDEF = 3,
+} IniError;
+
+typedef struct IniState {
+	IniHandler handler;
+	void *user;
+	IniError err;
+	int lineno;
+} IniState;
 
 /* Visibility for exported symbols (paired with meson's gnu_symbol_visibility:
    'hidden' to keep internal helpers private). */
@@ -31,67 +55,30 @@ https://github.com/benhoyt/inih
 #endif
 #endif
 
-/* Typedef for prototype of handler function.
-
-   Note that even though the value parameter has type "const char*", the user
-   may cast to "char*" and modify its content, as the value is not used again
-   after the call to ini_handler. This is not true of section and name --
-   those must not be modified.
-
-   Handler should return 0 on success, nonzero on error.
-*/
-#if INI_HANDLER_LINENO
-typedef int (*ini_handler)(void* user, const char* section,
-                           const char* name, const char* value,
-                           int lineno);
-#else
-typedef int (*ini_handler)(void* user, const char* section,
-                           const char* name, const char* value);
-#endif
 
 /* Parse a zero-terminated, writable string containing INI data. May have
    [section]s, name=value pairs (whitespace stripped), and comment lines
    starting with ';' (semicolon) or '#' (hash). Section is "" if name=value
-   pair parsed before any section heading. name:value pairs are also
-   supported as a concession to Python's configparser.
+   pair parsed before any section heading.
 
    The buffer is parsed in place and modified: section, name, and value
    pointers passed to the handler point into `string`, with NUL terminators
    written at token and line boundaries. The buffer is not restored.
 
-   For each name=value pair parsed, call handler function with given user
-   pointer as well as section, name, and value (data only valid for duration
-   of handler call). Handler should return 0 on success, nonzero on error.
+   Before calling, set `is->handler` (required) and `is->user` (optional).
+   On return, `is->lineno` holds the line at which parsing stopped, and
+   `is->err` holds the parse error code (if any).
 
-   Returns 0 on success, or a positive line number for the first parse error
-   (parsing does not stop on first error by default).
+   Returns true on success, false on the first parse error or when the
+   handler returns false.
 */
-INI_API int ini_parse_string(char* string, ini_handler handler, void* user);
+INI_API bool ini_parse_string(IniState *is, char *string);
 
 /* Read the entire file at `filename` into a freshly malloc'd, NUL-terminated
    buffer suitable for ini_parse_string(). If `size` is non-NULL, the number
    of bytes read (excluding the trailing NUL) is written to *size. Returns
    NULL on file-open, seek, allocation, or read error. The caller must free()
    the returned buffer. */
-INI_API char* ini_slurp(const char* filename, size_t* size);
-
-/* Stop parsing on first error (default is to keep parsing). */
-#ifndef INI_STOP_ON_FIRST_ERROR
-#define INI_STOP_ON_FIRST_ERROR 0
-#endif
-
-/* Nonzero to call the handler at the start of each new section (with
-   name and value NULL). Default is to only call the handler on
-   each name=value pair. */
-#ifndef INI_CALL_HANDLER_ON_NEW_SECTION
-#define INI_CALL_HANDLER_ON_NEW_SECTION 0
-#endif
-
-/* Nonzero to allow a name without a value (no '=' or ':' on the line) and
-   call the handler with value NULL in this case. Default is to treat
-   no-value lines as an error. */
-#ifndef INI_ALLOW_NO_VALUE
-#define INI_ALLOW_NO_VALUE 0
-#endif
+INI_API char *ini_slurp(const char *filename, size_t *size);
 
 #endif /* INI_H */

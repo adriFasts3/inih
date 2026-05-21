@@ -8,26 +8,6 @@ option('examples',
   value : false,
   description : 'build the example programs'
 )
-option('allow_no_value',
-  type : 'boolean',
-  value : false,
-  description : 'allow name with no value'
-)
-option('stop_on_first_error',
-  type : 'boolean',
-  value : false,
-  description : 'stop parsing after an error'
-)
-option('report_line_numbers',
-  type : 'boolean',
-  value : false,
-  description : 'report line number on ini_handler callback'
-)
-option('call_handler_on_new_section',
-  type : 'boolean',
-  value : false,
-  description : 'call the handler each time a new section is encountered'
-)
 option('tests',
   type : 'boolean',
   value : true,

@@ -17,63 +17,59 @@ See unittest.sh for how to run this.
 int User;
 char Prev_section[50];
 
-#if INI_HANDLER_LINENO
-int dumper(void* user, const char* section, const char* name,
-           const char* value, int lineno)
-#else
-int dumper(void* user, const char* section, const char* name,
-           const char* value)
-#endif
+bool dumper(IniState *is, const char *section, const char *name,
+            const char *value)
 {
-    User = *((int*)user);
-    if (!name || strcmp(section, Prev_section)) {
-        printf("... [%s]\n", section);
-        strncpy(Prev_section, section, sizeof(Prev_section));
+    User = *((int*)is->user);
+    if (!name || strcmp (section, Prev_section)) {
+        printf ("... [%s]\n", section);
+        strncpy (Prev_section, section, sizeof(Prev_section));
         Prev_section[sizeof(Prev_section) - 1] = '\0';
     }
     if (!name) {
-        return 0;
+        return true;
     }
 
-#if INI_HANDLER_LINENO
-    printf("... %s%s%s;  line %d\n", name, value ? "=" : "", value ? value : "", lineno);
-#else
-    printf("... %s%s%s;\n", name, value ? "=" : "", value ? value : "");
-#endif
+    printf ("... %s%s%s;  line %d\n", name, value ? "=" : "",
+            value ? value : "", is->lineno);
 
     if (!value) {
-        /* Happens when INI_ALLOW_NO_VALUE=1 and line has no value (no '=' or ':') */
-        return 0;
+        /* Line had no '=' */
+        return true;
     }
 
-    return strcmp(name, "user") == 0 && strcmp(value, "parse_error") == 0 ? 1 : 0;
+    return !(strcmp (name, "user") == 0 && strcmp (value, "parse_error") == 0);
 }
 
-void parse(const char* fname) {
+void parse(const char *fname) {
     static int u = 100;
-    char* contents;
-    int e;
+    char *contents;
+    IniState is = { .handler = dumper, .user = &u };
+    bool ok;
 
     *Prev_section = '\0';
-    contents = ini_slurp(fname, NULL);
+    contents = ini_slurp (fname, NULL);
     if (!contents) {
-        e = -1;
+        ok = false;
+        is.err = INI_ERROR_UNKNOWN;
+        is.lineno = -1;
     } else {
-        e = ini_parse_string(contents, dumper, &u);
-        free(contents);
+        ok = ini_parse_string (&is, contents);
+        free (contents);
     }
-    printf("%s: e=%d user=%d\n", fname, e, User);
+    printf ("%s: ok=%d err=%d line=%d user=%d\n",
+            fname, ok, is.err, is.lineno, User);
     u++;
 }
 
 int main(void)
 {
-    parse("no_file.ini");
-    parse("normal.ini");
-    parse("bad_section.ini");
-    parse("user_error.ini");
-    parse("duplicate_sections.ini");
-    parse("no_value.ini");
-    parse("name_only_after_error.ini");
+    parse ("no_file.ini");
+    parse ("normal.ini");
+    parse ("bad_section.ini");
+    parse ("user_error.ini");
+    parse ("duplicate_sections.ini");
+    parse ("no_value.ini");
+    parse ("name_only_after_error.ini");
     return 0;
 }
