@@ -70,19 +70,28 @@ bool ini_parse_string(IniState *is, char *string) {
 		if (*line_start == '[') {
 			/* A "[section]" line */
 			char *close = strchr (line_start + 1, ']');
-			if (close) {
-				*close = '\0';
-				section = line_start + 1;
-			}
-			else {
+			if (!close) {
 				is->err = INI_ERROR_MISSING_BRACKET;
 				return false;
 			}
+			/* Trailing whitespace was already stripped, so any byte
+			   between ']' and line_end is non-whitespace garbage. */
+			if (close + 1 < line_end) {
+				is->err = INI_ERROR_TRAILING_CHARS;
+				return false;
+			}
+			*close = '\0';
+			section = line_start + 1;
 		}
 		else if (*line_start && *line_start != ';' && *line_start != '#') {
 			/* Not a comment, must be a "name = value" pair */
 			char *sep = strchr (line_start, '=');
 			if (sep) {
+				if (sep == line_start) {
+					/* '=' with no name before it */
+					is->err = INI_ERROR_INVALID_DEF;
+					return false;
+				}
 				trim_spaces (line_start, sep);
 				char *value = skip_spaces (sep + 1, line_end);
 				if (!is->handler (is, section, line_start, value)) {
