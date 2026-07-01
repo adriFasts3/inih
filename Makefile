@@ -64,6 +64,7 @@ install: all
 # Roll a versioned source tarball (inih-<version>.tar.gz) via CPack.
 dist: configure
 	cpack --config $(BUILD_DIR)/CPackSourceConfig.cmake -B $(CURDIR)
+	rm -rf $(CURDIR)/_CPack_Packages   # CPack's working dir; keep only the tarball
 
 mrproper clean:
 	rm -rf $(BUILD_DIR)

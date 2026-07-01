@@ -6,3 +6,6 @@ AGENTS.md
 .*.swp
 *.o
 *.d
+/build/
+/_CPack_Packages/
+/inih-*.tar.gz

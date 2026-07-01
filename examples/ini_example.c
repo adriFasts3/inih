@@ -1,5 +1,7 @@
 /* Example: parse a simple configuration file */
 
+#define _POSIX_C_SOURCE 200809L  /* for strdup() under strict -std=c11 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

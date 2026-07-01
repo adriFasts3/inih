@@ -1,5 +1,7 @@
 /* inih -- tests for ini_parse_string() */
 
+#define _POSIX_C_SOURCE 200809L  /* for strdup() under strict -std=c11 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
