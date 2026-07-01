@@ -23,24 +23,33 @@ option(INIH_EXAMPLES "build the example programs" OFF)
 option(INIH_TESTS "build the test suite (noisy)" ON)
 
 #### inih ####
+# Build both a shared and a static library, sharing the base name so we get
+# libinih.so/.dylib and libinih.a (mirrors meson's default_library=both).
 add_library(inih SHARED ini.c)
+add_library(inih_static STATIC ini.c)
 add_library(inih::inih ALIAS inih)
+add_library(inih::inih_static ALIAS inih_static)
 
-target_include_directories(inih PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:include>
-)
+set_target_properties(inih PROPERTIES SOVERSION 0)
+set_target_properties(inih_static PROPERTIES OUTPUT_NAME inih)
 
-set_target_properties(inih PROPERTIES
-    SOVERSION 0
-    C_VISIBILITY_PRESET hidden
-)
+foreach(target inih inih_static)
+    target_include_directories(${target} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+    )
+    set_target_properties(${target} PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        POSITION_INDEPENDENT_CODE ON  # let the static lib be linked into shared objects
+    )
+endforeach()
 
 if(INIH_DISTRO_INSTALL)
     include(GNUInstallDirs)
 
-    install(TARGETS inih
+    install(TARGETS inih inih_static
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
     install(FILES ini.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
