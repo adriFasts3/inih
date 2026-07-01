@@ -16,6 +16,12 @@ Original project: https://github.com/benhoyt/inih
 #ifndef INI_H
 #define INI_H
 
+#define INI_VERSION "0.1.0"
+#define INI_VERSION_NUMBER 10
+#define INI_VERSION_MAJOR 0
+#define INI_VERSION_MINOR 1
+#define INI_VERSION_PATCH 0
+
 #include <stdbool.h>
 #include <stddef.h>
 

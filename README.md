@@ -125,7 +125,16 @@ Some differences between inih and Python's [ConfigParser](http://docs.python.org
 
 ## Building
 
-A plain `Makefile` and a `meson.build` are provided; either works. The `Makefile` is the simpler of the two — see its header comment for options. Run `make` to build the shared library, `make test` to run the test suite, `make EXAMPLES=1 examples` to build the examples, and `make install` to install (set `PREFIX`, `DESTDIR`, etc. as usual).
+A `CMakeLists.txt`, a thin `Makefile` wrapper around it, and a `meson.build` are provided. The `Makefile` is the simplest entry point — it drives CMake under the hood, so it needs `cmake` installed. Run `make` to build the shared library, `make test` to run the test suite, `make EXAMPLES=1 examples` to build the examples, and `make install` to install (set `PREFIX`, `DESTDIR`, etc. as usual — see the `Makefile` header comment for the full list of options).
+
+You can also invoke CMake directly, e.g. `cmake -S . -B build && cmake --build build`; the options are `-DINIH_DISTRO_INSTALL`, `-DINIH_TESTS`, and `-DINIH_EXAMPLES`.
+
+### Cleaning across build systems
+
+Because both a CMake and a Meson build can coexist in the tree, each build's clean also sweeps the *other* system's build directories (detected by their marker files, whatever the directory is named):
+
+* `make clean` removes the CMake build dir **and** any Meson build dirs.
+* Meson reserves the `clean` target name and offers no hook onto `ninja clean`, so the CMake sweep is a separate `clean-cmake` target — run both together: `ninja -C <builddir> clean clean-cmake`.
 
 ### Meson notes
 
