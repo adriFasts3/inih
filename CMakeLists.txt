@@ -8,7 +8,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(inih
-    VERSION "0.1.0"
+    VERSION "0.1.1"
     DESCRIPTION "simple .INI file parser"
     LANGUAGES C
 )
